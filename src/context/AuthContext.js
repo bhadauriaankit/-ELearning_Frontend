@@ -3,7 +3,6 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 
 const AuthContext = createContext();
-
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
@@ -15,76 +14,62 @@ export const AuthProvider = ({ children }) => {
     if (token) {
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       fetchUser();
-    } else {
-      setLoading(false);
-    }
+    } else setLoading(false);
   }, [token]);
 
   const fetchUser = async () => {
     try {
-      const response = await axios.get('http://localhost:8080/api/auth/me');
-      setUser(response.data);
-    } catch (error) {
-      console.error('Failed to fetch user:', error);
-      logout();
-    } finally {
-      setLoading(false);
-    }
+      const res = await axios.get('http://localhost:8080/api/auth/me');
+      setUser(res.data);
+      localStorage.setItem('user', JSON.stringify(res.data));
+    } catch (err) { logout(); }
+    finally { setLoading(false); }
   };
 
   const login = async (email, password) => {
     try {
-      const response = await axios.post('http://localhost:8080/api/auth/login', { email, password });
-      const { token, role, name, email: userEmail } = response.data;
+      const res = await axios.post('http://localhost:8080/api/auth/login', { email, password });
+      const { token, role, name, email: userEmail, id } = res.data;
       localStorage.setItem('token', token);
       localStorage.setItem('userRole', role);
+      const userObj = { email: userEmail, name, role, id };
+      localStorage.setItem('user', JSON.stringify(userObj));
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       setToken(token);
-      setUser({ email: userEmail, name, role });
-      toast.success(`Welcome ${name || userEmail}!`);
-      return true;
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Login failed');
-      return false;
+      setUser(userObj);
+      toast.success(`Welcome ${name}!`);
+      return { success: true, role };
+    } catch (err) {
+      toast.error('Login failed');
+      return { success: false };
     }
   };
 
-  const register = async (userData) => {
+  const register = async (data) => {
     try {
-      await axios.post('http://localhost:8080/api/auth/register', userData);
-      toast.success('Registration successful! Please login.');
+      await axios.post('http://localhost:8080/api/auth/register', data);
+      toast.success('Registered! Please login.');
       return true;
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Registration failed');
-      return false;
-    }
+    } catch (err) { toast.error('Registration failed'); return false; }
   };
 
   const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('userRole');
+    localStorage.clear();
     delete axios.defaults.headers.common['Authorization'];
     setToken(null);
     setUser(null);
-    toast.success('Logged out successfully');
+    toast.success('Logged out');
   };
 
-  const userRole = localStorage.getItem('userRole');
-
+  const role = localStorage.getItem('userRole');
   return (
     <AuthContext.Provider value={{
-      user,
-      login,
-      register,
-      logout,
+      user, login, register, logout,
       isAuthenticated: !!token,
-      isAdmin: userRole === 'ADMIN',
-      isAuthor: userRole === 'AUTHOR',
-      isStudent: userRole === 'STUDENT',
-      userRole,
-      loading,
-    }}>
-      {children}
-    </AuthContext.Provider>
+      isAdmin: role === 'ADMIN',
+      isAuthor: role === 'AUTHOR',
+      isStudent: role === 'STUDENT',
+      loading
+    }}>{children}</AuthContext.Provider>
   );
 };

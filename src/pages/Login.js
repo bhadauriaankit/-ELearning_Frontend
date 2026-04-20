@@ -9,19 +9,18 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const { login, userRole } = useAuth();
   const navigate = useNavigate();
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    const success = await login(email, password);
-    setLoading(false);
-    if (success) {
-      const role = localStorage.getItem('userRole');
-      if (role === 'ADMIN') navigate('/admin/dashboard');
-      else if (role === 'AUTHOR') navigate('/author/dashboard');
-      else navigate('/dashboard');
-    }
-  };
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setLoading(true);
+  const result = await login(email, password);
+  setLoading(false);
+  if (result.success) {
+    const role = result.role;
+    if (role === 'ADMIN') navigate('/admin/dashboard');
+    else if (role === 'AUTHOR') navigate('/author/dashboard');
+    else navigate('/dashboard');
+  }
+};
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center py-12 px-4">
