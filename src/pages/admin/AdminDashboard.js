@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { Users, FileText, Shield, TrendingUp } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
+import { Users, FileText } from 'lucide-react';   // removed Shield, TrendingUp
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState({ users: 0, tests: 0 });
