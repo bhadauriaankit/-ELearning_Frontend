@@ -21,7 +21,7 @@ const Dashboard = () => {
 
   const fetchStudentData = async () => {
     try {
-      const testsRes = await axios.get('http://localhost:8080/api/tests');
+      const testsRes = await axios.get('${process.env.react_app_api_url}/api/tests');
       setStats({ ...stats, totalTests: testsRes.data.length });
     } catch (error) {
       console.error('Error fetching student data:', error);
@@ -30,7 +30,7 @@ const Dashboard = () => {
 
   const fetchAuthorTests = async () => {
     try {
-      const response = await axios.get('http://localhost:8080/api/tests/my-tests');
+      const response = await axios.get('${process.env.react_app_api_url}/api/tests/my-tests');
       setMyTests(response.data);
       setStats({ ...stats, totalTests: response.data.length });
     } catch (error) {

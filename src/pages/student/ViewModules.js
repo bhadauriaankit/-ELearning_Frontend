@@ -12,8 +12,8 @@ const ViewModules = () => {
   const fetchModules = useCallback(async () => {
     try {
       const [modulesRes, testRes] = await Promise.all([
-        axios.get(`http://localhost:8080/api/modules/test/${testId}`),
-        axios.get(`http://localhost:8080/api/tests/${testId}`)
+        axios.get(`${process.env.react_app_api_url}/api/modules/test/${testId}`),
+        axios.get(`${process.env.react_app_api_url}/api/tests/${testId}`)
       ]);
       setModules(modulesRes.data);
       setTest(testRes.data);

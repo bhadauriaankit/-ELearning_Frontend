@@ -13,7 +13,7 @@ const CreateQuestion = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      await axios.post('http://localhost:8080/api/questions', question);
+      await axios.post('`${process.env.REACT_APP_API_URL}`/api/questions', question);
       toast.success('Question created!');
       navigate('/author/questions');
     } catch (error) { toast.error('Failed to create'); } finally { setLoading(false); }

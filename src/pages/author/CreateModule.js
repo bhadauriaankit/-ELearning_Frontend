@@ -24,7 +24,7 @@ const CreateModule = () => {
 
   const fetchTests = async () => {
     try {
-      const response = await axios.get('http://localhost:8080/api/tests/my-tests');
+      const response = await axios.get('`${process.env.REACT_APP_API_URL}`/api/tests/my-tests');
       setTests(response.data);
     } catch (error) {
       console.error('Error fetching tests:', error);
@@ -39,7 +39,7 @@ const CreateModule = () => {
     }
     setLoading(true);
     try {
-      await axios.post(`http://localhost:8080/api/modules/test/${module.testId}`, module);
+      await axios.post('`${process.env.REACT_APP_API_URL}`/api/modules/test/${module.testId}', module);
       toast.success('Module created successfully!');
       navigate('/author/tests');
     } catch (error) {

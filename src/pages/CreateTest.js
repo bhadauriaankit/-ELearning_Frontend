@@ -13,7 +13,7 @@ const CreateTest = () => {
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
-        const response = await axios.get('http://localhost:8080/api/questions');
+        const response = await axios.get('${process.env.react_app_api_url}/api/questions');
         setQuestions(response.data);
       } catch (error) {
         console.error('Error fetching questions:', error);
@@ -26,7 +26,7 @@ const CreateTest = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      await axios.post('http://localhost:8080/api/tests', { ...testData, questionIds: selectedQuestions.map(q => q.id) });
+      await axios.post('${process.env.react_app_api_url}/api/tests', { ...testData, questionIds: selectedQuestions.map(q => q.id) });
       navigate('/admin');
     } catch (error) {
       console.error('Error creating test:', error);

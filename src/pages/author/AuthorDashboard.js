@@ -15,7 +15,7 @@ const AuthorDashboard = () => {
 
   const fetchStatus = async () => {
     try {
-      const testsRes = await axios.get('http://localhost:8080/api/tests/my-tests');
+      const testsRes = await axios.get('`${process.env.REACT_APP_API_URL}`/api/tests/my-tests');
       setTests(testsRes.data);
       setHasTest(testsRes.data.length > 0);
       
@@ -23,7 +23,7 @@ const AuthorDashboard = () => {
         let modulesExist = false;
         let questionsExist = false;
         for (const test of testsRes.data) {
-          const modulesRes = await axios.get(`http://localhost:8080/api/modules/test/${test.id}`);
+          const modulesRes = await axios.get('`${process.env.REACT_APP_API_URL}`/api/modules/test/${test.id}');
           if (modulesRes.data.length > 0) modulesExist = true;
           if (test.questions && test.questions.length > 0) questionsExist = true;
         }

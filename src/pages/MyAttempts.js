@@ -10,7 +10,7 @@ const MyAttempts = () => {
   useEffect(() => {
     const fetchAttempts = async () => {
       try {
-        const response = await axios.get('http://localhost:8080/api/attempts/my-attempts');
+        const response = await axios.get('${process.env.react_app_api_url}/api/attempts/my-attempts');
         setAttempts(response.data);
       } catch (error) {
         console.error('Error fetching attempts:', error);

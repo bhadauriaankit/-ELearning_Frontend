@@ -29,9 +29,9 @@ const CoursePlayer = () => {
   const fetchCourse = useCallback(async () => {
     try {
       const [courseRes, modulesRes, attemptsRes] = await Promise.all([
-        axios.get(`http://localhost:8080/api/tests/${testId}`),
-        axios.get(`http://localhost:8080/api/modules/test/${testId}`),
-        axios.get('http://localhost:8080/api/attempts/my-attempts')
+        axios.get('`${process.env.REACT_APP_API_URL}`/api/tests/${testId}'),
+        axios.get('`${process.env.REACT_APP_API_URL}`/api/modules/test/${testId}'),
+        axios.get('`${process.env.REACT_APP_API_URL}`/api/attempts/my-attempts')
       ]);
       setCourse(courseRes.data);
       setModules(modulesRes.data);

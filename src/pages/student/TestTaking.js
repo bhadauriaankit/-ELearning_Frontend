@@ -30,8 +30,8 @@ const TestTaking = () => {
     try {
       setCheckingAccess(true);
       const [testRes, modulesRes] = await Promise.all([
-        axios.get(`http://localhost:8080/api/tests/${testId}`),
-        axios.get(`http://localhost:8080/api/modules/test/${testId}`)
+        axios.get(`${process.env.REACT_APP_API_URL}/api/tests/${testId}`),
+        axios.get(`${process.env.REACT_APP_API_URL}/api/modules/test/${testId}`)
       ]);
       setTest(testRes.data);
       const modules = modulesRes.data;
@@ -59,7 +59,7 @@ const TestTaking = () => {
 
   const startTest = async () => {
     try {
-      const response = await axios.post(`http://localhost:8080/api/attempts/start?testId=${testId}`);
+      const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/attempts/start?testId=${testId}`);
       setAttempt(response.data);
       setTimeLeft(response.data.duration * 60);
       const initial = {};
@@ -74,7 +74,7 @@ const TestTaking = () => {
 
   const saveAnswer = async (qid, opt) => {
     try {
-      await axios.post(`http://localhost:8080/api/attempts/${attempt.attemptId}/answer?questionId=${qid}&option=${opt}`);
+      await axios.post(`${process.env.REACT_APP_API_URL}/api/attempts/${attempt.attemptId}/answer?questionId=${qid}&option=${opt}`);
     } catch (err) { console.error(err); }
   };
 
@@ -87,7 +87,7 @@ const TestTaking = () => {
     if (!window.confirm('Submit your test? You cannot change answers after submission.')) return;
     setSubmitting(true);
     try {
-      const response = await axios.post(`http://localhost:8080/api/attempts/${attempt.attemptId}/submit`);
+      const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/attempts/${attempt.attemptId}/submit`);
       const { score, percentage } = response.data;
       toast.success(percentage >= 60 ? 'Test passed! Check your email for result.' : 'Test submitted. Result emailed.');
       navigate(`/result/${response.data.attemptId}`);

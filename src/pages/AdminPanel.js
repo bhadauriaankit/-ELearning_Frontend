@@ -14,7 +14,7 @@ const AdminPanel = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get('http://localhost:8080/api/admin/users');
+      const response = await axios.get('${process.env.react_app_api_url}/api/admin/users');
       setUsers(response.data);
     } catch (error) {
       console.error('Error fetching users:', error);
@@ -23,7 +23,7 @@ const AdminPanel = () => {
 
   const fetchTests = async () => {
     try {
-      const response = await axios.get('http://localhost:8080/api/admin/tests');
+      const response = await axios.get('${process.env.react_app_api_url}/api/admin/tests');
       setTests(response.data);
     } catch (error) {
       console.error('Error fetching tests:', error);
@@ -32,7 +32,7 @@ const AdminPanel = () => {
 
   const changeUserRole = async (userId, newRole) => {
     try {
-      await axios.put(`http://localhost:8080/api/admin/users/${userId}/role?role=${newRole}`);
+      await axios.put(`${process.env.react_app_api_url}/api/admin/users/${userId}/role?role=${newRole}`);
       fetchUsers();
     } catch (error) {
       console.error('Error changing role:', error);
@@ -41,7 +41,7 @@ const AdminPanel = () => {
 
   const publishTest = async (testId) => {
     try {
-      await axios.put(`http://localhost:8080/api/admin/tests/${testId}/publish`);
+      await axios.put(`${process.env.react_app_api_url}/api/admin/tests/${testId}/publish`);
       fetchTests();
     } catch (error) {
       console.error('Error publishing test:', error);

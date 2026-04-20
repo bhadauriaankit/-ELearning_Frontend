@@ -14,7 +14,7 @@ const CreateTest = () => {
 
   const fetchQuestions = async () => {
     try {
-      const response = await axios.get('http://localhost:8080/api/questions/my-questions');
+      const response = await axios.get('`${process.env.REACT_APP_API_URL}`/api/questions/my-questions');
       setQuestions(response.data);
     } catch (error) { console.error('Error:', error); }
   };
@@ -28,7 +28,7 @@ const CreateTest = () => {
     if (testData.questionIds.length === 0) { toast.error('Select at least one question'); return; }
     setLoading(true);
     try {
-      await axios.post('http://localhost:8080/api/tests', testData);
+      await axios.post('`${process.env.REACT_APP_API_URL}`/api/tests', testData);
       toast.success('Test created!');
       navigate('/author/tests');
     } catch (error) { toast.error('Failed to create'); } finally { setLoading(false); }

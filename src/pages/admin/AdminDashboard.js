@@ -12,8 +12,8 @@ const AdminDashboard = () => {
 
   const fetchData = async () => {
     try {
-      const usersRes = await axios.get('http://localhost:8080/api/admin/users');
-      const testsRes = await axios.get('http://localhost:8080/api/admin/tests');
+      const usersRes = await axios.get('`${process.env.REACT_APP_API_URL}`/api/admin/users');
+      const testsRes = await axios.get('`${process.env.REACT_APP_API_URL}`/api/admin/tests');
       setStats({ users: usersRes.data.length, tests: testsRes.data.length });
     } catch (error) { console.error('Error:', error); }
   };

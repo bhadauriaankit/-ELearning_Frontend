@@ -12,7 +12,7 @@ const AuthorQuestions = () => {
 
   const fetchQuestions = async () => {
     try {
-      const response = await axios.get('http://localhost:8080/api/questions/my-questions');
+      const response = await axios.get('`${process.env.REACT_APP_API_URL}`/api/questions/my-questions');
       setQuestions(response.data);
     } catch (error) { console.error('Error:', error); } finally { setLoading(false); }
   };
@@ -20,7 +20,7 @@ const AuthorQuestions = () => {
   const deleteQuestion = async (id) => {
     if (window.confirm('Delete this question?')) {
       try {
-        await axios.delete(`http://localhost:8080/api/questions/${id}`);
+        await axios.delete('`${process.env.REACT_APP_API_URL}`/api/questions/${id}');
         toast.success('Question deleted');
         fetchQuestions();
       } catch (error) { toast.error('Failed to delete'); }

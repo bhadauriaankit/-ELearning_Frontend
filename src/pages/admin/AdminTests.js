@@ -11,14 +11,14 @@ const AdminTests = () => {
 
   const fetchTests = async () => {
     try {
-      const response = await axios.get('http://localhost:8080/api/admin/tests');
+      const response = await axios.get('`${process.env.REACT_APP_API_URL}`/api/admin/tests');
       setTests(response.data);
     } catch (error) { console.error('Error:', error); } finally { setLoading(false); }
   };
 
   const publishTest = async (testId) => {
     try {
-      await axios.put(`http://localhost:8080/api/admin/tests/${testId}/publish`);
+      await axios.put('`${process.env.REACT_APP_API_URL}`/api/admin/tests/${testId}/publish');
       toast.success('Test published');
       fetchTests();
     } catch (error) { toast.error('Failed to publish'); }

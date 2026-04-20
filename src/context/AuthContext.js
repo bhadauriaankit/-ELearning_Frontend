@@ -19,7 +19,7 @@ export const AuthProvider = ({ children }) => {
 
   const fetchUser = async () => {
     try {
-      const res = await axios.get('http://localhost:8080/api/auth/me');
+      const res = await axios.get('`${process.env.REACT_APP_API_URL}`/api/auth/me');
       setUser(res.data);
       localStorage.setItem('user', JSON.stringify(res.data));
     } catch (err) { logout(); }
@@ -28,7 +28,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const res = await axios.post('http://localhost:8080/api/auth/login', { email, password });
+      const res = await axios.post('`${process.env.REACT_APP_API_URL}`/api/auth/login', { email, password });
       const { token, role, name, email: userEmail, id } = res.data;
       localStorage.setItem('token', token);
       localStorage.setItem('userRole', role);
@@ -47,7 +47,7 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (data) => {
     try {
-      await axios.post('http://localhost:8080/api/auth/register', data);
+      await axios.post('`${process.env.REACT_APP_API_URL}`/api/auth/register', data);
       toast.success('Registered! Please login.');
       return true;
     } catch (err) { toast.error('Registration failed'); return false; }

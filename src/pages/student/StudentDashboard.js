@@ -21,8 +21,8 @@ const StudentDashboard = () => {
   const fetchData = async () => {
     try {
       const userId = JSON.parse(localStorage.getItem('user'))?.id;
-      const coursesRes = await axios.get('http://localhost:8080/api/tests');
-      const attemptsRes = await axios.get('http://localhost:8080/api/attempts/my-attempts');
+      const coursesRes = await axios.get('`${process.env.REACT_APP_API_URL}`/api/tests');
+      const attemptsRes = await axios.get('`${process.env.REACT_APP_API_URL}`/api/attempts/my-attempts');
       const completedTests = attemptsRes.data.filter(a => a.status === 'COMPLETED');
       const avgScore = completedTests.length
         ? completedTests.reduce((sum, a) => sum + a.percentage, 0) / completedTests.length
@@ -33,7 +33,7 @@ const StudentDashboard = () => {
 
       const enrichedCourses = await Promise.all(
         coursesRes.data.map(async (course) => {
-          const modulesRes = await axios.get(`http://localhost:8080/api/modules/test/${course.id}`);
+          const modulesRes = await axios.get('`${process.env.REACT_APP_API_URL}`/api/modules/test/${course.id}');
           const modules = modulesRes.data;
           totalModulesAll += modules.length;
 

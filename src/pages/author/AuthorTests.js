@@ -15,14 +15,14 @@ const AuthorTests = () => {
 
   const fetchTests = async () => {
     try {
-      const response = await axios.get('http://localhost:8080/api/tests/my-tests');
+      const response = await axios.get('`${process.env.REACT_APP_API_URL}`/api/tests/my-tests');
       setTests(response.data);
       
       // Fetch modules for each test
       const modulesData = {};
       for (const test of response.data) {
         try {
-          const modulesRes = await axios.get(`http://localhost:8080/api/modules/test/${test.id}`);
+          const modulesRes = await axios.get('`${process.env.REACT_APP_API_URL}`/api/modules/test/${test.id}');
           modulesData[test.id] = modulesRes.data;
         } catch (error) {
           modulesData[test.id] = [];
@@ -39,7 +39,7 @@ const AuthorTests = () => {
   const deleteTest = async (id) => {
     if (window.confirm('Delete this test? This will also delete all modules.')) {
       try {
-        await axios.delete(`http://localhost:8080/api/tests/${id}`);
+        await axios.delete('`${process.env.REACT_APP_API_URL}`/api/tests/${id}');
         toast.success('Test deleted');
         fetchTests();
       } catch (error) { 

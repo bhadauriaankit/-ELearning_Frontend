@@ -11,7 +11,7 @@ const TestResult = () => {
   useEffect(() => {
     const fetchResult = async () => {
       try {
-        const response = await axios.get(`http://localhost:8080/api/attempts/${attemptId}/result`);
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/attempts/${attemptId}/result`);
         setResult(response.data);
       } catch (error) { console.error('Error:', error); } finally { setLoading(false); }
     };
