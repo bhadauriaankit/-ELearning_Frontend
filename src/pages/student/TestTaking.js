@@ -84,19 +84,20 @@ const TestTaking = () => {
   };
 
   const handleSubmit = async () => {
-    if (!window.confirm('Submit your test? You cannot change answers after submission.')) return;
-    setSubmitting(true);
-    try {
-      const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/attempts/${attempt.attemptId}/submit`);
-      const { score, percentage } = response.data;
-      toast.success(percentage >= 60 ? 'Test passed! Check your email for result.' : 'Test submitted. Result emailed.');
-      navigate(`/result/${response.data.attemptId}`);
-    } catch (err) {
-      toast.error('Failed to submit test');
-    } finally {
-      setSubmitting(false);
-    }
-  };
+  if (!window.confirm('Submit your test? You cannot change answers after submission.')) return;
+  setSubmitting(true);
+  try {
+    const response = await axios.post(`${API_URL}/api/attempts/${attempt.attemptId}/submit`);
+    const { percentage } = response.data; // removed score
+    const passed = percentage >= 60;
+    toast.success(passed ? 'Test passed! Result emailed.' : 'Test submitted. Result emailed.');
+    navigate(`/result/${response.data.attemptId}`);
+  } catch (err) {
+    toast.error('Failed to submit test');
+  } finally {
+    setSubmitting(false);
+  }
+};
 
   const formatTime = (sec) => {
     const mins = Math.floor(sec / 60);

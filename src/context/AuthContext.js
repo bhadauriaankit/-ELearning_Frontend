@@ -1,8 +1,10 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { API_URL } from '../config';
 
 const AuthContext = createContext();
+
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
@@ -13,44 +15,62 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     if (token) {
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      fetchUser();
-    } else setLoading(false);
+    } else {
+      delete axios.defaults.headers.common['Authorization'];
+    }
   }, [token]);
 
-  const fetchUser = async () => {
+  const fetchUser = useCallback(async () => {
     try {
-      const res = await axios.get('`${process.env.REACT_APP_API_URL}`/api/auth/me');
-      setUser(res.data);
-      localStorage.setItem('user', JSON.stringify(res.data));
-    } catch (err) { logout(); }
-    finally { setLoading(false); }
-  };
+      const response = await axios.get(`${API_URL}/api/auth/me`);
+      setUser(response.data);
+      localStorage.setItem('user', JSON.stringify(response.data));
+    } catch (error) {
+      console.error('Failed to fetch user:', error);
+      logout();
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (token) {
+      fetchUser();
+    } else {
+      setLoading(false);
+    }
+  }, [token, fetchUser]);
 
   const login = async (email, password) => {
     try {
-      const res = await axios.post('`${process.env.REACT_APP_API_URL}`/api/auth/login', { email, password });
-      const { token, role, name, email: userEmail, id } = res.data;
+      const response = await axios.post(`${API_URL}/api/auth/login`, { email, password });
+      const { token, role, name, email: userEmail, id } = response.data;
       localStorage.setItem('token', token);
       localStorage.setItem('userRole', role);
-      const userObj = { email: userEmail, name, role, id };
-      localStorage.setItem('user', JSON.stringify(userObj));
+      const userData = { email: userEmail, name, role, id };
+      localStorage.setItem('user', JSON.stringify(userData));
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       setToken(token);
-      setUser(userObj);
-      toast.success(`Welcome ${name}!`);
+      setUser(userData);
+      toast.success(`Welcome ${name || userEmail}!`);
       return { success: true, role };
-    } catch (err) {
-      toast.error('Login failed');
+    } catch (error) {
+      const errorMsg = error.response?.data?.error || 'Login failed';
+      toast.error(errorMsg);
       return { success: false };
     }
   };
 
-  const register = async (data) => {
+  const register = async (userData) => {
     try {
-      await axios.post('`${process.env.REACT_APP_API_URL}`/api/auth/register', data);
-      toast.success('Registered! Please login.');
+      await axios.post(`${API_URL}/api/auth/register`, userData);
+      toast.success('Registration successful! Please login.');
       return true;
-    } catch (err) { toast.error('Registration failed'); return false; }
+    } catch (error) {
+      const errorMsg = error.response?.data?.error || 'Registration failed';
+      toast.error(errorMsg);
+      return false;
+    }
   };
 
   const logout = () => {
@@ -58,18 +78,22 @@ export const AuthProvider = ({ children }) => {
     delete axios.defaults.headers.common['Authorization'];
     setToken(null);
     setUser(null);
-    toast.success('Logged out');
+    toast.success('Logged out successfully');
   };
 
-  const role = localStorage.getItem('userRole');
+  const userRole = localStorage.getItem('userRole');
+
   return (
     <AuthContext.Provider value={{
       user, login, register, logout,
       isAuthenticated: !!token,
-      isAdmin: role === 'ADMIN',
-      isAuthor: role === 'AUTHOR',
-      isStudent: role === 'STUDENT',
+      isAdmin: userRole === 'ADMIN',
+      isAuthor: userRole === 'AUTHOR',
+      isStudent: userRole === 'STUDENT',
+      userRole,
       loading
-    }}>{children}</AuthContext.Provider>
+    }}>
+      {children}
+    </AuthContext.Provider>
   );
 };
