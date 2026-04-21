@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { FileText, BookOpen, Layers, CheckCircle, Lock } from 'lucide-react';
+import { API_URL } from '../../config';
 
 const AuthorDashboard = () => {
   const [hasTest, setHasTest] = useState(false);

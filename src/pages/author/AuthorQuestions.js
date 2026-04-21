@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Plus, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { API_URL } from '../../config';
 
 const AuthorQuestions = () => {
   const [questions, setQuestions] = useState([]);

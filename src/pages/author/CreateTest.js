@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { Save } from 'lucide-react';
-import { API_URL } from '../config';
+import { API_URL } from '../../config';
 
 const CreateTest = () => {
   const navigate = useNavigate();
