@@ -13,11 +13,17 @@ const CreateQuestion = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    try {
-      await axios.post('`${process.env.REACT_APP_API_URL}`/api/questions', question);
-      toast.success('Question created!');
-      navigate('/author/questions');
-    } catch (error) { toast.error('Failed to create'); } finally { setLoading(false); }
+   try {
+            // ✅ Corrected: Use backticks for template literals, no extra quotes
+            await axios.post(`${process.env.REACT_APP_API_URL}/api/questions`, question);
+            toast.success('Question created!');
+            navigate('/author/questions');
+        } catch (error) {
+            toast.error('Failed to create question');
+            console.error(error);
+        } finally {
+            setLoading(false);
+        } 
   };
 
   return (
