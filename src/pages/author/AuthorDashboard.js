@@ -10,22 +10,23 @@ const AuthorDashboard = () => {
   const [hasQuestions, setHasQuestions] = useState(false);
   const [tests, setTests] = useState([]);
 
-  useEffect(() => {
-    fetchStatus();
-  }, []);
+  useEffect(() => { fetchStatus(); }, []);
 
   const fetchStatus = async () => {
     try {
-      const testsRes = await axios.get('`${process.env.REACT_APP_API_URL}`/api/tests/my-tests');
-      setTests(testsRes.data);
-      setHasTest(testsRes.data.length > 0);
-      
-      if (testsRes.data.length > 0) {
+      const testsRes = await axios.get(`${API_URL}/api/tests/my-tests`);
+      // ✅ Guard: ensure response is an array
+      const testsData = Array.isArray(testsRes.data) ? testsRes.data : [];
+      setTests(testsData);
+      setHasTest(testsData.length > 0);
+
+      if (testsData.length > 0) {
         let modulesExist = false;
         let questionsExist = false;
-        for (const test of testsRes.data) {
-          const modulesRes = await axios.get('`${process.env.REACT_APP_API_URL}`/api/modules/test/${test.id}');
-          if (modulesRes.data.length > 0) modulesExist = true;
+        for (const test of testsData) {
+          const modulesRes = await axios.get(`${API_URL}/api/modules/test/${test.id}`);
+          const modules = Array.isArray(modulesRes.data) ? modulesRes.data : [];
+          if (modules.length > 0) modulesExist = true;
           if (test.questions && test.questions.length > 0) questionsExist = true;
         }
         setHasModules(modulesExist);
@@ -33,6 +34,7 @@ const AuthorDashboard = () => {
       }
     } catch (error) {
       console.error('Error fetching status:', error);
+      setTests([]);
     }
   };
 
