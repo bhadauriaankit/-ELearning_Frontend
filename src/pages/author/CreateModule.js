@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-import { API_URL } from '../../config';
 import { Save, Video, BookOpen } from 'lucide-react';
 
 const CreateModule = () => {
@@ -25,10 +24,13 @@ const CreateModule = () => {
 
   const fetchTests = async () => {
     try {
-      const response = await axios.get('`${process.env.REACT_APP_API_URL}`/api/tests/my-tests');
-      setTests(response.data);
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/tests/my-tests`);
+      // ✅ Guard: ensure response is an array
+      const testsData = Array.isArray(response.data) ? response.data : [];
+      setTests(testsData);
     } catch (error) {
       console.error('Error fetching tests:', error);
+      setTests([]);
     }
   };
 
@@ -40,11 +42,12 @@ const CreateModule = () => {
     }
     setLoading(true);
     try {
-      await axios.post('`${process.env.REACT_APP_API_URL}`/api/modules/test/${module.testId}', module);
+      await axios.post(`${process.env.REACT_APP_API_URL}/api/modules/test/${module.testId}`, module);
       toast.success('Module created successfully!');
       navigate('/author/tests');
     } catch (error) {
       toast.error('Failed to create module');
+      console.error(error);
     } finally {
       setLoading(false);
     }
