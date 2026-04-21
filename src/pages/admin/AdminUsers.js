@@ -10,14 +10,18 @@ const AdminUsers = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get('`${process.env.REACT_APP_API_URL}`/api/admin/users');
-      setUsers(response.data);
-    } catch (error) { console.error('Error:', error); } finally { setLoading(false); }
-  };
+      const response = await axios.get(`${API_URL}/api/admin/users`);
+    const users = Array.isArray(response.data) ? response.data : [];
+    setUsers(users);
+  } catch (error) {
+    console.error(error);
+    setUsers([]);
+  }
+};
 
   const changeRole = async (userId, newRole) => {
     try {
-      await axios.put('`${process.env.REACT_APP_API_URL}`/api/admin/users/${userId}/role?role=${newRole}');
+      await axios.put(`${API_URL}/api/admin/users/${userId}/role?role=${newRole}`);
       toast.success('Role updated');
       fetchUsers();
     } catch (error) { toast.error('Failed to update role'); }

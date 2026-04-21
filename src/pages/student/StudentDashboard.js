@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { API_URL } from '../../config';
 import { BookOpen, Award, TrendingUp, CheckCircle } from 'lucide-react';
+import { API_URL } from '../../config';
 
 const StudentDashboard = () => {
   const [courses, setCourses] = useState([]);
@@ -15,16 +15,17 @@ const StudentDashboard = () => {
     avgScore: 0
   });
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  useEffect(() => { fetchData(); }, []);
 
   const fetchData = async () => {
     try {
       const userId = JSON.parse(localStorage.getItem('user'))?.id;
-      const coursesRes = await axios.get('`${process.env.REACT_APP_API_URL}`/api/tests');
-      const attemptsRes = await axios.get('`${process.env.REACT_APP_API_URL}`/api/attempts/my-attempts');
-      const completedTests = attemptsRes.data.filter(a => a.status === 'COMPLETED');
+      const coursesRes = await axios.get(`${API_URL}/api/tests`);
+      const coursesData = Array.isArray(coursesRes.data) ? coursesRes.data : [];
+      
+      const attemptsRes = await axios.get(`${API_URL}/api/attempts/my-attempts`);
+      const attemptsData = Array.isArray(attemptsRes.data) ? attemptsRes.data : [];
+      const completedTests = attemptsData.filter(a => a.status === 'COMPLETED');
       const avgScore = completedTests.length
         ? completedTests.reduce((sum, a) => sum + a.percentage, 0) / completedTests.length
         : 0;
@@ -33,12 +34,11 @@ const StudentDashboard = () => {
       let completedModulesAll = 0;
 
       const enrichedCourses = await Promise.all(
-        coursesRes.data.map(async (course) => {
-          const modulesRes = await axios.get('`${process.env.REACT_APP_API_URL}`/api/modules/test/${course.id}');
-          const modules = modulesRes.data;
+        coursesData.map(async (course) => {
+          const modulesRes = await axios.get(`${API_URL}/api/modules/test/${course.id}`);
+          const modules = Array.isArray(modulesRes.data) ? modulesRes.data : [];
           totalModulesAll += modules.length;
 
-          // User-specific localStorage key
           const storageKey = `course_${course.id}_progress_${userId}`;
           const saved = localStorage.getItem(storageKey);
           const completedIds = saved ? JSON.parse(saved) : [];
@@ -47,8 +47,6 @@ const StudentDashboard = () => {
 
           const progress = modules.length ? (completedCount / modules.length) * 100 : 0;
           const allCompleted = modules.length > 0 && completedCount === modules.length;
-
-          // Check if test already taken (from backend attempts)
           const takenTest = completedTests.find(t => t.testTitle === course.title);
           const testTaken = !!takenTest;
           const testScore = takenTest ? takenTest.percentage : null;
@@ -67,7 +65,7 @@ const StudentDashboard = () => {
 
       setCourses(enrichedCourses);
       setStats({
-        totalCourses: coursesRes.data.length,
+        totalCourses: coursesData.length,
         completedModules: completedModulesAll,
         totalModules: totalModulesAll,
         completedTests: completedTests.length,
@@ -75,17 +73,14 @@ const StudentDashboard = () => {
       });
     } catch (error) {
       console.error('Dashboard error:', error);
+      setCourses([]);
     } finally {
       setLoading(false);
     }
   };
 
   if (loading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
-      </div>
-    );
+    return <div className="flex justify-center items-center h-64"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600" /></div>;
   }
 
   return (
@@ -93,7 +88,6 @@ const StudentDashboard = () => {
       <div className="container mx-auto px-6">
         <h1 className="text-3xl font-bold text-gray-900 mb-8">My Learning Dashboard</h1>
 
-        {/* Stats Cards */}
         <div className="grid md:grid-cols-4 gap-6 mb-8">
           <div className="bg-white rounded-xl p-6 shadow-md">
             <div className="flex justify-between items-start">
@@ -121,7 +115,6 @@ const StudentDashboard = () => {
           </div>
         </div>
 
-        {/* My Courses */}
         <h2 className="text-2xl font-bold mb-6">My Courses</h2>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {courses.map(course => (
@@ -132,8 +125,6 @@ const StudentDashboard = () => {
               <div className="p-6">
                 <h3 className="text-xl font-bold mb-2">{course.title}</h3>
                 <p className="text-gray-600 text-sm mb-4 line-clamp-2">{course.description}</p>
-                
-                {/* Progress Bar */}
                 <div className="mb-4">
                   <div className="flex justify-between text-sm mb-1">
                     <span>Progress</span>
@@ -143,30 +134,21 @@ const StudentDashboard = () => {
                     <div className="bg-indigo-600 h-2 rounded-full" style={{ width: `${course.progress}%` }} />
                   </div>
                 </div>
-
                 <div className="flex justify-between text-sm text-gray-500 mb-4">
                   <span>📚 {course.modules.length} modules</span>
                   <span>✅ {course.completedCount} completed</span>
                 </div>
-
                 {course.testTaken ? (
-                  <div className="text-center text-green-600 font-semibold">
-                    ✅ Test Completed – Score: {course.testScore}%
-                  </div>
+                  <div className="text-center text-green-600 font-semibold">✅ Test Completed – Score: {course.testScore}%</div>
                 ) : course.allCompleted ? (
-                  <Link to={`/test/${course.id}`} className="block w-full bg-green-600 text-white text-center py-2 rounded-lg hover:bg-green-700">
-                    Take Final Test →
-                  </Link>
+                  <Link to={`/test/${course.id}`} className="block w-full bg-green-600 text-white text-center py-2 rounded-lg hover:bg-green-700">Take Final Test →</Link>
                 ) : (
-                  <Link to={`/course/${course.id}`} className="block w-full bg-indigo-600 text-white text-center py-2 rounded-lg hover:bg-indigo-700">
-                    Continue Learning →
-                  </Link>
+                  <Link to={`/course/${course.id}`} className="block w-full bg-indigo-600 text-white text-center py-2 rounded-lg hover:bg-indigo-700">Continue Learning →</Link>
                 )}
               </div>
             </div>
           ))}
         </div>
-
         {courses.length === 0 && (
           <div className="text-center py-12 bg-white rounded-xl shadow-md">
             <BookOpen className="h-16 w-16 text-gray-400 mx-auto mb-4" />
