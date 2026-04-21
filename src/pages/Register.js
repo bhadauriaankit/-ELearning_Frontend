@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Mail, Lock, User, LogIn, Eye, EyeOff } from 'lucide-react';
+import { API_URL } from '../config';
 
 const Register = () => {
   const [formData, setFormData] = useState({

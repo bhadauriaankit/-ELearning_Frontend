@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { login, register } from '../api'
+import { API_URL } from '../config';
 import { ErrorMsg } from '../components/ui'
 
 export default function AuthPage() {

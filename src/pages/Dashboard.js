@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import { API_URL } from '../config';
 import { BookOpen, Award, TrendingUp, Clock, PlusCircle, FileText, Users, Shield } from 'lucide-react';
 
 const Dashboard = () => {

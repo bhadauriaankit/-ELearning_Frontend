@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import { API_URL } from '../config';
 import { BookOpen, Award, TrendingUp, CheckCircle } from 'lucide-react';
 
 const StudentDashboard = () => {

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { API_URL } from '../config';
 import { ChevronLeft, ChevronRight, Play, BookOpen, CheckCircle, Clock, Lock } from 'lucide-react';
 
 const CoursePlayer = () => {

@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { Clock, Lock } from 'lucide-react';
+import { API_URL } from '../../config';
 
 const TestTaking = () => {
   const { testId } = useParams();
@@ -30,19 +31,17 @@ const TestTaking = () => {
     try {
       setCheckingAccess(true);
       const [testRes, modulesRes] = await Promise.all([
-        axios.get(`${process.env.REACT_APP_API_URL}/api/tests/${testId}`),
-        axios.get(`${process.env.REACT_APP_API_URL}/api/modules/test/${testId}`)
+        axios.get(`${API_URL}/api/tests/${testId}`),
+        axios.get(`${API_URL}/api/modules/test/${testId}`)
       ]);
       setTest(testRes.data);
       const modules = modulesRes.data;
-
       const userId = getUserId();
       const storageKey = `course_${testId}_progress_${userId}`;
       const saved = localStorage.getItem(storageKey);
       const completedIds = saved ? JSON.parse(saved) : [];
       const completedCount = modules.filter(m => completedIds.includes(m.id)).length;
       setModulesInfo({ total: modules.length, completed: completedCount });
-
       if (modules.length > 0 && completedCount !== modules.length) {
         setAccessDenied(true);
         toast.error(`Complete all ${modules.length} modules before taking the test.`);
@@ -59,7 +58,7 @@ const TestTaking = () => {
 
   const startTest = async () => {
     try {
-      const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/attempts/start?testId=${testId}`);
+      const response = await axios.post(`${API_URL}/api/attempts/start?testId=${testId}`);
       setAttempt(response.data);
       setTimeLeft(response.data.duration * 60);
       const initial = {};
@@ -74,7 +73,7 @@ const TestTaking = () => {
 
   const saveAnswer = async (qid, opt) => {
     try {
-      await axios.post(`${process.env.REACT_APP_API_URL}/api/attempts/${attempt.attemptId}/answer?questionId=${qid}&option=${opt}`);
+      await axios.post(`${API_URL}/api/attempts/${attempt.attemptId}/answer?questionId=${qid}&option=${opt}`);
     } catch (err) { console.error(err); }
   };
 
@@ -84,25 +83,25 @@ const TestTaking = () => {
   };
 
   const handleSubmit = async () => {
-  if (!window.confirm('Submit your test? You cannot change answers after submission.')) return;
-  setSubmitting(true);
-  try {
-    const response = await axios.post(`${API_URL}/api/attempts/${attempt.attemptId}/submit`);
-    const { percentage } = response.data; // removed score
-    const passed = percentage >= 60;
-    toast.success(passed ? 'Test passed! Result emailed.' : 'Test submitted. Result emailed.');
-    navigate(`/result/${response.data.attemptId}`);
-  } catch (err) {
-    toast.error('Failed to submit test');
-  } finally {
-    setSubmitting(false);
-  }
-};
+    if (!window.confirm('Submit your test? You cannot change answers after submission.')) return;
+    setSubmitting(true);
+    try {
+      const response = await axios.post(`${API_URL}/api/attempts/${attempt.attemptId}/submit`);
+      const { percentage } = response.data; // removed unused 'score'
+      const passed = percentage >= 60;
+      toast.success(passed ? 'Test passed! Result emailed.' : 'Test submitted. Result emailed.');
+      navigate(`/result/${response.data.attemptId}`);
+    } catch (err) {
+      toast.error('Failed to submit test');
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   const formatTime = (sec) => {
     const mins = Math.floor(sec / 60);
     const secs = sec % 60;
-    return `${mins}:${secs.toString().padStart(2,'0')}`;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
   useEffect(() => {
@@ -110,9 +109,7 @@ const TestTaking = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [testId]);
 
-  if (checkingAccess) {
-    return <div className="flex justify-center items-center h-64"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"/></div>;
-  }
+  if (checkingAccess) return <div className="flex justify-center items-center h-64"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600" /></div>;
 
   if (accessDenied) {
     return (
@@ -130,9 +127,7 @@ const TestTaking = () => {
     );
   }
 
-  if (!test || !attempt) {
-    return <div className="flex justify-center items-center h-64"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"/></div>;
-  }
+  if (!test || !attempt) return <div className="flex justify-center items-center h-64"><div className="animate-spin" /></div>;
 
   const answeredCount = Object.values(answers).filter(a => a !== null).length;
   const totalQuestions = test.questions?.length || 0;
@@ -143,21 +138,15 @@ const TestTaking = () => {
       <div className="container mx-auto px-6">
         <div className="bg-white rounded-xl shadow-md p-6 mb-6 sticky top-0 z-10">
           <div className="flex justify-between items-center flex-wrap gap-4">
-            <div>
-              <h1 className="text-2xl font-bold">{test.title}</h1>
-              <p className="text-gray-600">Question {answeredCount} of {totalQuestions}</p>
-            </div>
+            <div><h1 className="text-2xl font-bold">{test.title}</h1><p className="text-gray-600">Question {answeredCount} of {totalQuestions}</p></div>
             <div className="text-right">
-              <div className="flex items-center text-2xl font-bold text-indigo-600">
-                <Clock className="h-6 w-6 mr-2" />
-                {formatTime(timeLeft)}
-              </div>
+              <div className="flex items-center text-2xl font-bold text-indigo-600"><Clock className="h-6 w-6 mr-2" />{formatTime(timeLeft)}</div>
               <button onClick={handleSubmit} disabled={submitting} className="mt-2 px-6 py-2 bg-indigo-600 text-white rounded-lg">Submit</button>
             </div>
           </div>
           <div className="mt-4">
             <div className="flex justify-between text-sm"><span>Progress</span><span>{Math.round(progress)}%</span></div>
-            <div className="w-full bg-gray-200 rounded-full h-2"><div className="bg-indigo-600 h-2 rounded-full" style={{width:`${progress}%`}}/></div>
+            <div className="w-full bg-gray-200 rounded-full h-2"><div className="bg-indigo-600 h-2 rounded-full" style={{ width: `${progress}%` }} /></div>
           </div>
         </div>
 
@@ -168,7 +157,7 @@ const TestTaking = () => {
               <div className="space-y-3">
                 {['A','B','C','D'].map(opt => (
                   <label key={opt} className={`flex items-center p-4 border-2 rounded-lg cursor-pointer ${answers[q.id] === opt ? 'border-indigo-600 bg-indigo-50' : 'border-gray-200 hover:border-indigo-300'}`}>
-                    <input type="radio" name={`q-${q.id}`} value={opt} checked={answers[q.id] === opt} onChange={() => handleAnswer(q.id, opt)} className="h-4 w-4 text-indigo-600"/>
+                    <input type="radio" name={`q-${q.id}`} value={opt} checked={answers[q.id] === opt} onChange={() => handleAnswer(q.id, opt)} className="h-4 w-4 text-indigo-600" />
                     <span className="ml-3"><span className="font-semibold mr-2">{opt}.</span>{q[`option${opt}`]}</span>
                   </label>
                 ))}
@@ -188,4 +177,3 @@ const TestTaking = () => {
 };
 
 export default TestTaking;
-

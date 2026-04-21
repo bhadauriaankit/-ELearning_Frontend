@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Users, FileText, CheckCircle } from 'lucide-react';
+import { API_URL } from '../config';
 
 const AdminPanel = () => {
   const [users, setUsers] = useState([]);

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { API_URL } from '../config';
 import { BookOpen, Clock, Award, Users, TrendingUp, Shield } from 'lucide-react';
 
 const LandingPage = () => {

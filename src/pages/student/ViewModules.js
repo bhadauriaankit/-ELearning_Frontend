@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
+import { API_URL } from '../config';
 import { BookOpen, Clock, ChevronLeft } from 'lucide-react';
 
 const ViewModules = () => {
