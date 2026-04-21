@@ -15,24 +15,42 @@ const CreateTest = () => {
 
   const fetchQuestions = async () => {
     try {
-      const response = await axios.get('`${process.env.REACT_APP_API_URL}`/api/questions/my-questions');
-      setQuestions(response.data);
-    } catch (error) { console.error('Error:', error); }
+      const response = await axios.get(`${API_URL}/api/questions/my-questions`);
+      // ✅ Guard: ensure response is an array
+      const questionsData = Array.isArray(response.data) ? response.data : [];
+      setQuestions(questionsData);
+    } catch (error) {
+      console.error('Error fetching questions:', error);
+      setQuestions([]);
+    }
   };
 
   const toggleQuestion = (questionId) => {
-    setTestData(prev => ({ ...prev, questionIds: prev.questionIds.includes(questionId) ? prev.questionIds.filter(id => id !== questionId) : [...prev.questionIds, questionId] }));
+    setTestData(prev => ({
+      ...prev,
+      questionIds: prev.questionIds.includes(questionId)
+        ? prev.questionIds.filter(id => id !== questionId)
+        : [...prev.questionIds, questionId]
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (testData.questionIds.length === 0) { toast.error('Select at least one question'); return; }
+    if (testData.questionIds.length === 0) {
+      toast.error('Select at least one question');
+      return;
+    }
     setLoading(true);
     try {
-      await axios.post('`${process.env.REACT_APP_API_URL}`/api/tests', testData);
+      await axios.post(`${API_URL}/api/tests`, testData);
       toast.success('Test created!');
       navigate('/author/tests');
-    } catch (error) { toast.error('Failed to create'); } finally { setLoading(false); }
+    } catch (error) {
+      toast.error('Failed to create test');
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -41,15 +59,73 @@ const CreateTest = () => {
         <div className="max-w-4xl mx-auto">
           <h1 className="text-3xl font-bold text-gray-900 mb-8">Create New Test</h1>
           <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-md p-6">
-            <div className="mb-6"><label className="block text-sm font-medium mb-2">Test Title</label><input type="text" required value={testData.title} onChange={(e) => setTestData({...testData, title: e.target.value})} className="input-field" /></div>
-            <div className="mb-6"><label className="block text-sm font-medium mb-2">Description</label><textarea rows="3" value={testData.description} onChange={(e) => setTestData({...testData, description: e.target.value})} className="input-field" /></div>
-            <div className="mb-6"><label className="block text-sm font-medium mb-2">Duration (minutes)</label><input type="number" required value={testData.duration} onChange={(e) => setTestData({...testData, duration: parseInt(e.target.value)})} className="w-32 input-field" min="1" max="180" /></div>
-            <div className="mb-6"><label className="block text-sm font-medium mb-2">Select Questions ({testData.questionIds.length} selected)</label>
-              <div className="border rounded-lg max-h-96 overflow-y-auto">
-                {questions.map((q) => (<label key={q.id} className="flex items-center p-4 border-b hover:bg-gray-50 cursor-pointer"><input type="checkbox" checked={testData.questionIds.includes(q.id)} onChange={() => toggleQuestion(q.id)} className="h-4 w-4 text-indigo-600" /><div className="ml-3"><p className="text-sm font-medium">{q.questionText}</p><p className="text-xs text-gray-500">Correct: {q.correctAnswer}</p></div></label>))}
-              </div>
+            <div className="mb-6">
+              <label className="block text-sm font-medium mb-2">Test Title</label>
+              <input
+                type="text"
+                required
+                value={testData.title}
+                onChange={(e) => setTestData({...testData, title: e.target.value})}
+                className="input-field"
+                placeholder="e.g., Java Programming Basics"
+              />
             </div>
-            <button type="submit" disabled={loading} className="w-full btn-primary py-3"><Save className="inline h-5 w-5 mr-2" />{loading ? 'Creating...' : 'Create Test'}</button>
+
+            <div className="mb-6">
+              <label className="block text-sm font-medium mb-2">Description</label>
+              <textarea
+                rows="3"
+                value={testData.description}
+                onChange={(e) => setTestData({...testData, description: e.target.value})}
+                className="input-field"
+                placeholder="Describe what this test covers..."
+              />
+            </div>
+
+            <div className="mb-6">
+              <label className="block text-sm font-medium mb-2">Duration (minutes)</label>
+              <input
+                type="number"
+                required
+                value={testData.duration}
+                onChange={(e) => setTestData({...testData, duration: parseInt(e.target.value)})}
+                className="w-32 input-field"
+                min="1"
+                max="180"
+              />
+            </div>
+
+            <div className="mb-6">
+              <label className="block text-sm font-medium mb-2">Select Questions ({testData.questionIds.length} selected)</label>
+              <div className="border rounded-lg max-h-96 overflow-y-auto">
+                {questions.map((question) => (
+                  <label key={question.id} className="flex items-center p-4 border-b hover:bg-gray-50 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={testData.questionIds.includes(question.id)}
+                      onChange={() => toggleQuestion(question.id)}
+                      className="h-4 w-4 text-indigo-600"
+                    />
+                    <div className="ml-3">
+                      <p className="text-sm font-medium">{question.questionText}</p>
+                      <p className="text-xs text-gray-500">Correct: {question.correctAnswer}</p>
+                    </div>
+                  </label>
+                ))}
+              </div>
+              {questions.length === 0 && (
+                <p className="text-sm text-gray-500 mt-2">No questions available. Please create questions first.</p>
+              )}
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading || testData.questionIds.length === 0}
+              className="w-full btn-primary py-3 disabled:opacity-50"
+            >
+              <Save className="inline h-5 w-5 mr-2" />
+              {loading ? 'Creating...' : 'Create Test'}
+            </button>
           </form>
         </div>
       </div>
