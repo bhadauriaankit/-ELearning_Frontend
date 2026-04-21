@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { API_URL } from '../../config';
-import { Users, FileText } from 'lucide-react';   // removed Shield, TrendingUp
+import { Users, FileText } from 'lucide-react';
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState({ users: 0, tests: 0 });
@@ -13,10 +12,18 @@ const AdminDashboard = () => {
 
   const fetchData = async () => {
     try {
-      const usersRes = await axios.get('`${process.env.REACT_APP_API_URL}`/api/admin/users');
-      const testsRes = await axios.get('`${process.env.REACT_APP_API_URL}`/api/admin/tests');
-      setStats({ users: usersRes.data.length, tests: testsRes.data.length });
-    } catch (error) { console.error('Error:', error); }
+      const usersRes = await axios.get(`${process.env.REACT_APP_API_URL}/api/admin/users`);
+      const testsRes = await axios.get(`${process.env.REACT_APP_API_URL}/api/admin/tests`);
+      
+      // ✅ Ensure we count only if response is an array
+      const usersCount = Array.isArray(usersRes.data) ? usersRes.data.length : 0;
+      const testsCount = Array.isArray(testsRes.data) ? testsRes.data.length : 0;
+      
+      setStats({ users: usersCount, tests: testsCount });
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+      setStats({ users: 0, tests: 0 });
+    }
   };
 
   return (
